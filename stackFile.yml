@@ -1,0 +1,57 @@
+version: '1.0'
+services:
+  - name: mongo
+    type: mongodb
+    version: 3.4
+    configuration: StandAlone
+    password: null
+    ports:
+      - 27017
+    remoteAccess: false
+    deployTo:
+      - mongo
+
+  - name: mongo-express
+    type: nodejs
+    version: 8
+    ports:
+      - 8081
+    source:
+      type: git
+      url: https://github.com/mongo-express/mongo-express
+    localDeps: "npm install\nnpm run build"
+    startCommand: npm start
+    env:
+      ME_CONFIG_MONGODB_SERVER: "{{=service('mongo').getMasterAlias()}}"
+      ME_CONFIG_MONGODB_PORT: "{{=service('mongo').getMainPort()}}"
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "{{=service('mongo').get('password')}}"
+      ME_CONFIG_SITE_COOKIESECRET: "{{=randomString(32)}}"
+      ME_CONFIG_SITE_SESSIONSECRET: "{{=randomString(32)}}"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: null
+      VCAP_APP_HOST: 0.0.0.0
+      VCAP_APP_PORT: 8081
+    comments:
+      env:
+        ME_CONFIG_BASICAUTH_PASSWORD: Password for user "admin"
+    deployTo:
+      - mongo
+
+  - name: proxy
+    type: nginx
+    version: 1.13
+    ports:
+      - 80
+      - 443
+    serviceFiles:
+      - name: mongo-express
+    deployTo:
+      - mongo
+
+hosts:
+  - name: mongo
+    requirements:
+      cores: 1
+      memory: 1
