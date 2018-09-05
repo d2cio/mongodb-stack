@@ -2,7 +2,7 @@ version: '1.0'
 services:
   - name: mongo
     type: mongodb
-    version: 3.4
+    version: 3.6
     configuration: StandAlone
     password: null
     ports:
@@ -41,7 +41,7 @@ services:
 
   - name: proxy
     type: nginx
-    version: 1.13
+    version: 1.14
     ports:
       - 80
       - 443
