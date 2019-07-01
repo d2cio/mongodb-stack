@@ -12,15 +12,11 @@ services:
       - mongo
 
   - name: mongo-express
-    type: nodejs
-    version: 10
+    type: docker
+    image: mongo-express
+    version: latest
     ports:
       - 8081
-    source:
-      type: git
-      url: https://github.com/mongo-express/mongo-express
-    localDeps: "npm install\nnpm run build"
-    startCommand: npm start
     env:
       ME_CONFIG_MONGODB_SERVER: "{{=service('mongo').getMasterAlias()}}"
       ME_CONFIG_MONGODB_PORT: "{{=service('mongo').getMainPort()}}"
